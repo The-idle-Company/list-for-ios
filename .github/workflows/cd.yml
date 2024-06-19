@@ -18,7 +18,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '18.19.0'
 
       - name: Install Ionic CLI and Capacitor assets
         run: npm install -g @ionic/cli @capacitor/assets
@@ -56,4 +56,3 @@ jobs:
           APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
         run: |
           xcrun altool --upload-app --type ios --file $PWD/build/App/App.ipa --apiKey $APP_STORE_CONNECT_KEY_ID --apiIssuer $APP_STORE_CONNECT_ISSUER_ID
-
