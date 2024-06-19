@@ -38,8 +38,12 @@ jobs:
           ionic build
           npx cap sync ios
 
+      - name: Configure Xcode for automatic signing
+        run: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace -scheme App -sdk iphoneos -configuration Release archive -archivePath $PWD/build/App.xcarchive DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM_ID }}
+
       - name: Build and Archive iOS app
         run: |
           cd ios/App
-          xcodebuild -workspace App.xcworkspace -scheme App -sdk iphoneos -configuration Release archive -archivePath $PWD/build/App.xcarchive
-
+          xcodebuild -workspace App.xcworkspace -scheme App -sdk iphoneos -configuration Release archive -archivePath $PWD/build/App.xcarchive DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM_ID }}
