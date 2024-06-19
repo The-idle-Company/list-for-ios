@@ -13,6 +13,9 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      - name: Set debug logging
+        run: echo "ACTIONS_RUNNER_DEBUG=true" >> $GITHUB_ENV
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -36,9 +39,13 @@ jobs:
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          # Import certificate and provisioning profile from secrets
+          # Debug: Show the decoded certificate and provisioning profile
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
+          echo "Decoded certificate:"
+          cat $CERTIFICATE_PATH
           echo "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode > $PP_PATH
+          echo "Decoded provisioning profile:"
+          cat $PP_PATH
 
           # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -88,3 +95,4 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="YOUR_PROVISIONING_PROFILE_NAME" \
             DEVELOPMENT_TEAM="YOUR_DEVELOPMENT_TEAM_ID" \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
+
