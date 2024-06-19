@@ -1,0 +1,8 @@
+{
+  "name": "list-for-ios",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular",
+  "id": "2662c192"
+}
