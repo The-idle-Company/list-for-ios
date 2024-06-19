@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Add iOS platform
+        run: npx cap add ios
+
       - name: Build Ionic app
         run: |
           ionic build
