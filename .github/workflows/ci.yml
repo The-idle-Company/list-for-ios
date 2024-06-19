@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Capacitor iOS
+        run: npm install @capacitor/ios
+
       - name: Add iOS platform
         run: npx cap add ios
 
@@ -39,3 +42,4 @@ jobs:
         run: |
           cd ios/App
           xcodebuild -workspace App.xcworkspace -scheme App -sdk iphoneos -configuration Release archive -archivePath $PWD/build/App.xcarchive
+
