@@ -37,12 +37,21 @@ jobs:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git config --global url."https://${{ secrets.PAT_TOKEN }}:@github.com/".insteadOf "https://github.com/"
+          git config --global credential.helper store
+          echo "https://${{ secrets.PAT_TOKEN }}@github.com" > ~/.git-credentials
+
+      - name: Create App ID on Developer Portal
+        run: |
+          bundle exec fastlane produce -u skf134@gmail.com -a com.ionicframework.Mylist --skip_itc --app_name "list-for-ios"
+        env:
+          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
 
       - name: Install the Apple certificate and provisioning profile
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
         run: |
-          bundle exec fastlane match appstore --readonly --shallow_clone
+          bundle exec fastlane match appstore --shallow_clone
 
       - name: Build Ionic app
         run: |
@@ -70,4 +79,3 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="YOUR_PROVISIONING_PROFILE_NAME" \
             DEVELOPMENT_TEAM="YOUR_DEVELOPMENT_TEAM_ID" \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
-
