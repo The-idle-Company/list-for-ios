@@ -1,4 +1,4 @@
-name: "Build iOS app"
+name: "CI - Build iOS app"
 
 on:
   push:
@@ -101,9 +101,3 @@ jobs:
           name: app
           path: $RUNNER_TEMP/build/list-for-ios.ipa
           retention-days: 3
-
-      - name: Post Checkout repository
-        run: echo "Post Checkout repository step"
-
-      - name: Complete job
-        run: echo "Job complete"

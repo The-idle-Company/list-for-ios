@@ -1,97 +1,36 @@
-name: Continuous Deployment
+name: "CD - Deploy iOS app"
 
 on:
   workflow_run:
-    workflows: ["Continuous Integration"]
+    workflows: ["CI - Build iOS app"]
     types:
       - completed
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: macos-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Set up job
+        run: echo "Setting up job..."
 
-      - name: Install the Apple certificate and provisioning profile
-        env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-        run: |
-          # Create variables
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+      - name: Set debug logging
+        run: echo "##[debug]Logging enabled"
 
-          # Import certificate and provisioning profile from secrets
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
-
-          # Create temporary keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
-          # Import certificate to keychain
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
-
-          # Apply provisioning profile
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: app
+          path: ${{ runner.temp }}/build
 
       - name: Install dependencies
-        run: |
-          npm install -g @ionic/cli @capacitor/assets
-          npm install
+        run: sudo gem install xcodeproj
 
-      - name: Add iOS platform
-        run: npx cap add ios
-
-      - name: Build Ionic app
-        run: |
-          ionic build
-          npx cap sync ios
-
-      - name: Build and sign iOS app
+      - name: Deploy to App Store
         env:
-          KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
         run: |
-          cd ios/App
-          xcodebuild -workspace App.xcworkspace \
-            -scheme App \
-            -sdk iphoneos \
-            -configuration Release \
-            -archivePath $RUNNER_TEMP/App.xcarchive \
-            clean archive \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="YOUR_PROVISIONING_PROFILE_NAME" \
-            DEVELOPMENT_TEAM="YOUR_DEVELOPMENT_TEAM_ID" \
-            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
-
-      - name: Export the archive
-        run: |
-          xcodebuild -exportArchive \
-            -archivePath $RUNNER_TEMP/App.xcarchive \
-            -exportPath $RUNNER_TEMP/App \
-            -exportOptionsPlist ios/App/exportOptions.plist \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="YOUR_PROVISIONING_PROFILE_NAME" \
-            DEVELOPMENT_TEAM="YOUR_DEVELOPMENT_TEAM_ID" \
-            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
-
-      - name: Deploy the app
-        env:
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
-        run: |
-          xcrun altool --upload-app --type ios --file $RUNNER_TEMP/App/App.ipa --apiKey $APP_STORE_CONNECT_KEY_ID --apiIssuer $APP_STORE_CONNECT_ISSUER_ID
+          cd ${{ runner.temp }}/build
+          xcrun altool --upload-app --type ios --file list-for-ios.ipa --apiKey ${{ secrets.APP_STORE_CONNECT_KEY_ID }} --apiIssuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }} --apiKeyFile ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
