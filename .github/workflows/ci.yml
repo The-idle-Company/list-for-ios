@@ -76,7 +76,7 @@ jobs:
           KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          xcodebuild -project list-for-ios.xcodeproj -scheme "list-for-ios" \
+          xcodebuild -project list-for-ios/list-for-ios.xcodeproj -scheme "list-for-ios" \
           -archivePath $RUNNER_TEMP/list-for-ios.xcarchive \
           -sdk iphoneos \
           -configuration Debug \
