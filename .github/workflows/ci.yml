@@ -50,7 +50,7 @@ jobs:
 
       - name: Build archive
         run: |
-          xcodebuild -workspace list-for-ios.xcworkspace -scheme "list-for-ios" \
+          xcodebuild -project list-for-ios/list-for-ios.xcodeproj -scheme "list-for-ios" \
           -archivePath $RUNNER_TEMP/list-for-ios.xcarchive \
           -sdk iphoneos \
           -configuration Debug \
