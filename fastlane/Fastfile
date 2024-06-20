@@ -1,38 +1,34 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
-
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
-
 default_platform(:ios)
 
 platform :ios do
-  desc "Build and sign the iOS app"
+  desc "Build and sign the app"
   lane :build do
     # Match ensures that your certificates and provisioning profiles are installed
-    match(type: "appstore", readonly: true)
+    match(
+      type: "appstore",
+      readonly: false, # Ensure this is false so it can create a new certificate if needed
+      generate_apple_certs: true, # Allow generating Apple certificates
+      force_for_new_certificates: false, # Do not force create new certificates if limit is reached
+      skip_provisioning_profiles: false
+    )
     gym(
       scheme: "App",
+      export_method: "app-store",
       export_options: {
-        provisioningProfiles: {
-          "com.yourcompany.yourapp" => "match AppStore com.yourcompany.yourapp"
-        }
+        compileBitcode: false,
+        method: "app-store"
       }
     )
   end
 
-  desc "Deploy the app to TestFlight"
+  desc "Deploy the app"
   lane :deploy do
-    build
-    pilot
+    build_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      export_method: "app-store",
+      output_directory: "./build"
+    )
+    upload_to_app_store
   end
 end
