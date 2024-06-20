@@ -73,18 +73,20 @@ jobs:
             clean archive \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="YOUR_PROVISIONING_PROFILE_NAME" \
-            DEVELOPMENT_TEAM="YOUR_DEVELOPMENT_TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER=${{ secrets.PROVISIONING_PROFILE_SPECIFIER }} \
+            DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM_ID }} \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
 
-      - name: Export the archive
+      - name: Export iOS App
         run: |
           xcodebuild -exportArchive \
             -archivePath $RUNNER_TEMP/App.xcarchive \
-            -exportPath $RUNNER_TEMP/App \
-            -exportOptionsPlist ios/App/exportOptions.plist \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="YOUR_PROVISIONING_PROFILE_NAME" \
-            DEVELOPMENT_TEAM="YOUR_DEVELOPMENT_TEAM_ID" \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath $RUNNER_TEMP/App.ipa \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: App.ipa
+          path: $RUNNER_TEMP/App.ipa
