@@ -54,6 +54,12 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
+      - name: Check installed certificates
+        run: security find-identity -v -p codesigning
+
+      - name: Check provisioning profiles
+        run: ls ~/Library/MobileDevice/Provisioning\ Profiles
+
       - name: Build Ionic app
         run: |
           ionic build
@@ -89,4 +95,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: App.ipa
-          path: $RUNNER_TEMP/App.ipa
+          path: $RUNNER_TEMP/App.ipa/App.ipa
