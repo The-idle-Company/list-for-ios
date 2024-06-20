@@ -87,7 +87,7 @@ jobs:
         run: |
           xcodebuild -exportArchive \
             -archivePath $RUNNER_TEMP/App.xcarchive \
-            -exportOptionsPlist ./config/ExportOptions.plist \
+            -exportOptionsPlist ExportOptions.plist \
             -exportPath $RUNNER_TEMP/App.ipa \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
 
