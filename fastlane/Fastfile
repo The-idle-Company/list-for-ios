@@ -5,10 +5,9 @@ platform :ios do
   lane :build do
     match(
       type: "appstore",
-      readonly: true, # Ensure this is true to prevent creating a new certificate
-      generate_apple_certs: false, # Ensure this is false to avoid generating new certificates
-      force_for_new_certificates: false, # Ensure this is false to avoid forcing new certificates
-      skip_provisioning_profiles: false
+      readonly: false, # Allow creating new certificates if needed
+      force_for_new_certificates: false, # Do not force creating new certificates
+      generate_apple_certs: false # Ensure this is false to avoid generating new certificates
     )
     gym(
       scheme: "App",

@@ -55,7 +55,7 @@ jobs:
           FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
           FASTLANE_SESSION: ${{ secrets.FASTLANE_SESSION }}
         run: |
-          bundle exec fastlane match appstore --readonly true --generate_apple_certs false
+          bundle exec fastlane match appstore --readonly false --generate_apple_certs false
 
       - name: Build Ionic app
         run: |
