@@ -32,6 +32,10 @@ jobs:
           gem install bundler
           bundle install
 
+      - name: Configure Git for Authentication
+        run: |
+          git config --global url."https://${{ secrets.GITHUB_TOKEN }}:@github.com/".insteadOf "https://github.com/"
+        
       - name: Install the Apple certificate and provisioning profile
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
