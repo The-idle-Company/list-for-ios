@@ -42,10 +42,10 @@ jobs:
           # Debug: Show the decoded certificate and provisioning profile
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
           echo "Decoded certificate:"
-          cat $CERTIFICATE_PATH
+          cat $CERTIFICATE_PATH || echo "Certificate not found"
           echo "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode > $PP_PATH
           echo "Decoded provisioning profile:"
-          cat $PP_PATH
+          cat $PP_PATH || echo "Provisioning profile not found"
 
           # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -95,4 +95,5 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="YOUR_PROVISIONING_PROFILE_NAME" \
             DEVELOPMENT_TEAM="YOUR_DEVELOPMENT_TEAM_ID" \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
+
 
