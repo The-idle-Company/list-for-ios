@@ -24,9 +24,11 @@ jobs:
           bundle install
 
       - name: Configure Git for Authentication
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}:@github.com/".insteadOf "https://github.com/"
-        
+          git config --global url."https://${{ secrets.PAT_TOKEN }}:@github.com/".insteadOf "https://github.com/"
+
       - name: Install the Apple certificate and provisioning profile
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
@@ -50,3 +52,4 @@ jobs:
           APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
         run: |
           xcrun altool --upload-app --type ios --file $RUNNER_TEMP/App/App.ipa --apiKey $APP_STORE_CONNECT_KEY_ID --apiIssuer $APP_STORE_CONNECT_ISSUER_ID
+
