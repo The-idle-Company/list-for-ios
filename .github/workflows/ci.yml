@@ -55,7 +55,7 @@ jobs:
           FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
           FASTLANE_SESSION: ${{ secrets.FASTLANE_SESSION }}
         run: |
-          bundle exec fastlane match appstore --shallow_clone
+          bundle exec fastlane match appstore
 
       - name: Build Ionic app
         run: |
@@ -84,4 +84,3 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="YOUR_PROVISIONING_PROFILE_NAME" \
             DEVELOPMENT_TEAM="YOUR_DEVELOPMENT_TEAM_ID" \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
-
