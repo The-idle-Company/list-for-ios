@@ -30,13 +30,9 @@ jobs:
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          # Debug: Show the decoded certificate and provisioning profile
+          # Import certificate and provisioning profile from secrets
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
-          echo "Decoded certificate:"
-          cat $CERTIFICATE_PATH || echo "Certificate not found"
           echo "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode > $PP_PATH
-          echo "Decoded provisioning profile:"
-          cat $PP_PATH || echo "Provisioning profile not found"
 
           # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -47,6 +43,9 @@ jobs:
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychains -d user -s $KEYCHAIN_PATH
+
+          # Trust certificate
+          sudo security add-trusted-cert -d -r trustRoot -k $KEYCHAIN_PATH $CERTIFICATE_PATH
 
           # Apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
@@ -102,5 +101,6 @@ jobs:
           APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
         run: |
           xcrun altool --upload-app --type ios --file $RUNNER_TEMP/App/App.ipa --apiKey $APP_STORE_CONNECT_KEY_ID --apiIssuer $APP_STORE_CONNECT_ISSUER_ID
+
 
 
