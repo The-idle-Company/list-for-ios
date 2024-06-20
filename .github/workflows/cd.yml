@@ -46,7 +46,7 @@ jobs:
           FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
           FASTLANE_SESSION: ${{ secrets.FASTLANE_SESSION }}
         run: |
-          bundle exec fastlane match appstore
+          bundle exec fastlane match appstore --readonly false --generate_apple_certs false
 
       - name: Build and sign iOS app using Fastlane
         run: bundle exec fastlane deploy
