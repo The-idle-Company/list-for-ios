@@ -5,11 +5,11 @@ platform :ios do
   lane :build do
     match(
       type: "appstore",
-      readonly: false, # Allow creating new certificates if needed
-      force_for_new_certificates: false, # Do not force creating new certificates
-      generate_apple_certs: false # Ensure this is false to avoid generating new certificates
+      readonly: false, # Ensure this is false so it can create a new certificate if needed
+      generate_apple_certs: false, # Ensure this is false to avoid generating new certificates
     )
     gym(
+      workspace: "App.xcworkspace", # Specify the workspace or project file
       scheme: "App",
       export_method: "app-store",
       export_options: {
@@ -22,7 +22,7 @@ platform :ios do
   desc "Deploy the app"
   lane :deploy do
     build_app(
-      workspace: "App.xcworkspace",
+      workspace: "App.xcworkspace", # Specify the workspace or project file
       scheme: "App",
       export_method: "app-store",
       output_directory: "./build"
