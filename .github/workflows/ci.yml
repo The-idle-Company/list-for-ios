@@ -42,10 +42,11 @@ jobs:
 
       - name: Create App ID on Developer Portal
         run: |
-          bundle exec fastlane produce -u skf134@gmail.com -a com.ionicframework.Mylist --skip_itc --app_name "list-for-ios"
+          bundle exec fastlane produce -u your_apple_id@example.com -a com.ionicframework.Mylist --skip_itc --app_name "list-for-ios"
         env:
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
           FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          FASTLANE_SESSION: ${{ secrets.FASTLANE_SESSION }}
 
       - name: Install the Apple certificate and provisioning profile
         env:
@@ -79,3 +80,4 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="YOUR_PROVISIONING_PROFILE_NAME" \
             DEVELOPMENT_TEAM="YOUR_DEVELOPMENT_TEAM_ID" \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
+
