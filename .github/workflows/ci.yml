@@ -54,10 +54,10 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
-      - name: Clean the project
-        run: |
-          cd ios/App
-          xcodebuild clean -workspace App.xcworkspace -scheme App -configuration Release
+      # - name: Clean the project
+      #   run: |
+      #     cd ios/App
+      #     xcodebuild clean -workspace App.xcworkspace -scheme App -configuration Release
 
       - name: Build Ionic app
         run: |
