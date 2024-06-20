@@ -54,11 +54,10 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
-      - name: Check installed certificates
-        run: security find-identity -v -p codesigning
-
-      - name: Check provisioning profiles
-        run: ls ~/Library/MobileDevice/Provisioning\ Profiles
+      - name: Clean the project
+        run: |
+          cd ios/App
+          xcodebuild clean -workspace App.xcworkspace -scheme App -configuration Release
 
       - name: Build Ionic app
         run: |
@@ -81,13 +80,14 @@ jobs:
             CODE_SIGN_IDENTITY="iPhone Distribution" \
             PROVISIONING_PROFILE_SPECIFIER=${{ secrets.PROVISIONING_PROFILE_SPECIFIER }} \
             DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM_ID }} \
-            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH" \
+            -verbose
 
       - name: Export iOS App
         run: |
           xcodebuild -exportArchive \
             -archivePath $RUNNER_TEMP/App.xcarchive \
-            -exportOptionsPlist ExportOptions.plist \
+            -exportOptionsPlist ./config/ExportOptions.plist \
             -exportPath $RUNNER_TEMP/App.ipa \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
 
