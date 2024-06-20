@@ -3,11 +3,10 @@ default_platform(:ios)
 platform :ios do
   desc "Build and sign the app"
   lane :build do
-    # Match ensures that your certificates and provisioning profiles are installed
     match(
       type: "appstore",
       readonly: false, # Ensure this is false so it can create a new certificate if needed
-      generate_apple_certs: true, # Allow generating Apple certificates
+      generate_apple_certs: false, # Do not generate new Apple certificates to avoid hitting the limit
       force_for_new_certificates: false, # Do not force create new certificates if limit is reached
       skip_provisioning_profiles: false
     )
