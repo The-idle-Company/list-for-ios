@@ -1,6 +1,6 @@
 name: "Deploy iOS app"
 
-# Trigger the workflow on completion of the CI workflow
+# Trigger the workflow after the CI workflow completes
 on:
   workflow_run:
     workflows: ["Build iOS app"]
@@ -10,8 +10,9 @@ on:
 jobs:
   deploy:
     runs-on: macos-latest # Use the latest macOS environment
+
     steps:
-      # Initial setup step
+      # Initial setup for the job
       - name: Set up job
         run: echo "Setting up job..."
 
@@ -22,6 +23,13 @@ jobs:
       # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      # Configure Git for authentication using a GitHub token
+      - name: Configure Git for Authentication
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global url."https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 
       # Install Ruby and Fastlane
       - name: Install Ruby and Fastlane
@@ -35,14 +43,19 @@ jobs:
           gem install bundler
           bundle install
 
-      # Download the built IPA file from S3
-      - name: Download application from S3
+      # Bump the app version using Fastlane
+      - name: Bump version
         run: |
-          aws s3 cp s3://${{ secrets.AWS_BUCKET_NAME }}/list-for-ios.ipa $RUNNER_TEMP/list-for-ios.ipa
+          bundle exec fastlane bump_version
+
+      # Perform an enterprise release using Fastlane
+      - name: Enterprise release
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+          KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }} # Fastlane match password if using match
+        run: |
+          bundle exec fastlane enterprise_release
 
       # Deploy the app to TestFlight using Fastlane
       - name: Deploy to TestFlight
@@ -51,7 +64,7 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }} # Fastlane match password if using match
         run: |
-          bundle exec fastlane upload_to_testflight
+          bundle exec fastlane deploy
 
       # Final step to indicate job completion
       - name: Complete job
