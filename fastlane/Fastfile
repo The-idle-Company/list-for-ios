@@ -1,32 +1,33 @@
+# fastlane/Fastfile
+
 default_platform(:ios)
 
 platform :ios do
-  desc "Build and sign the app"
-  lane :build do
-    match(
-      type: "appstore",
-      readonly: true, # Ensure this is true to avoid creating new certificates
-      generate_apple_certs: false, # Ensure this is false to avoid generating new certificates
-    )
-    gym(
-      workspace: "App.xcworkspace", # Specify the workspace or project file
-      scheme: "App",
-      export_method: "app-store",
-      export_options: {
-        compileBitcode: false,
-        method: "app-store"
-      }
-    )
+  desc "Take screenshots"
+  lane :take_screenshots do
+    capture_screenshots
   end
 
-  desc "Deploy the app"
+  desc "Bump version and commit"
+  lane :bump_version do
+    increment_version_number
+    commit_version_bump(message: "Bump version to #{get_version_number}")
+    push_to_git_remote
+  end
+
+  desc "Enterprise release"
+  lane :enterprise_release do
+    match(type: "enterprise")
+    build_app(scheme: "list-for-ios", export_method: "enterprise")
+    upload_to_testflight
+    # Add your enterprise distribution steps here
+  end
+
+  desc "Deploy to TestFlight"
   lane :deploy do
-    build_app(
-      workspace: "App.xcworkspace", # Specify the workspace or project file
-      scheme: "App",
-      export_method: "app-store",
-      output_directory: "./build"
-    )
-    upload_to_app_store
+    match(type: "appstore") # Ensure your certificates and profiles are installed
+    build_app(scheme: "list-for-ios") # Build your app
+    upload_to_testflight # Upload to TestFlight
   end
 end
+
