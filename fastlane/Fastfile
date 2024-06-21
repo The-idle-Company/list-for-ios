@@ -12,8 +12,14 @@ platform :ios do
 
   desc "Bump version and commit"
   lane :bump_version do
-    increment_version_number
-    commit_version_bump(message: "Bump version to #{get_version_number}")
+    increment_version_number(
+      xcodeproj: "list-for-ios/list-for-ios.xcodeproj", # Specify the correct project path
+      bump_type: "patch" # You can change this to "minor" or "major" if needed
+    )
+    commit_version_bump(
+      xcodeproj: "list-for-ios/list-for-ios.xcodeproj", # Specify the correct project path
+      message: "Bump version to #{get_version_number}"
+    )
     push_to_git_remote
   end
 
@@ -39,3 +45,4 @@ platform :ios do
     )
   end
 end
+

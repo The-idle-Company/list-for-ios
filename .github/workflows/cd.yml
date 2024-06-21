@@ -9,10 +9,10 @@ on:
 
 jobs:
   deploy:
-    runs-on: macos-latest # Use the latest macOS environment
+    runs-on: macos-latest
 
     steps:
-      # Initial setup for the job
+      # Initial setup step
       - name: Set up job
         run: echo "Setting up job..."
 
@@ -24,56 +24,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Configure Git for authentication using a GitHub token
-      - name: Configure Git for Authentication
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global url."https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
-
       # Install Ruby and Fastlane
       - name: Install Ruby and Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.7'
+          ruby-version: '3.0'
 
-      # Install Fastlane dependencies
-      - name: Install Fastlane
+      - name: Install Fastlane dependencies
         run: |
           gem install bundler -v 2.4.22
           bundle install
 
-      # Download the built IPA file from S3
-      - name: Download from AWS S3
+      # Download the IPA file from S3
+      - name: Download from S3
+        run: |
+          aws s3 cp s3://${{ secrets.AWS_S3_BUCKET }}/ipa/list-for-ios.ipa $RUNNER_TEMP/list-for-ios.ipa
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          aws s3 cp s3://${{ secrets.AWS_S3_BUCKET }}/ipa/list-for-ios.ipa $RUNNER_TEMP/list-for-ios.ipa --region ${{ secrets.AWS_REGION }}
 
-      # Bump the app version using Fastlane
-      - name: Bump version
-        run: |
-          bundle exec fastlane bump_version
-
-      # Perform an enterprise release using Fastlane
-      - name: Enterprise release
-        env:
-          KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }} # Fastlane match password if using match
-        run: |
-          bundle exec fastlane enterprise_release
-
-      # Deploy the app to TestFlight using Fastlane
+      # Upload the app to TestFlight using Fastlane
       - name: Deploy to TestFlight
         env:
           KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }} # Fastlane match password if using match
         run: |
-          bundle exec fastlane deploy
+          bundle exec fastlane upload_to_testflight
 
       # Final step to indicate job completion
       - name: Complete job
