@@ -1,6 +1,6 @@
 name: "Deploy iOS app"
 
-# Trigger the workflow when the CI workflow is completed successfully
+# Trigger the workflow on completion of the CI workflow
 on:
   workflow_run:
     workflows: ["Build iOS app"]
@@ -10,7 +10,6 @@ on:
 jobs:
   deploy:
     runs-on: macos-latest # Use the latest macOS environment
-
     steps:
       # Initial setup step
       - name: Set up job
@@ -39,7 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global url."https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
       # Install the Apple certificate and provisioning profile
       - name: Install the Apple certificate and provisioning profile
@@ -70,7 +69,7 @@ jobs:
 
           # Apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles          
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
       # Build the Ionic app and synchronize with the iOS platform
       - name: Build Ionic app
@@ -84,10 +83,10 @@ jobs:
         with:
           ruby-version: '2.7'
 
-      # Install Bundler compatible with Ruby 2.7
-      - name: Install Bundler
+      # Install Fastlane dependencies
+      - name: Install Fastlane
         run: |
-          gem install bundler -v 2.4.22
+          gem install bundler:2.4.22 # Specify compatible bundler version
           bundle install
 
       # Take screenshots for the app using Fastlane
@@ -121,4 +120,3 @@ jobs:
       # Final step to indicate job completion
       - name: Complete job
         run: echo "Job complete"
-
