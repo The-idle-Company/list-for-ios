@@ -84,10 +84,10 @@ jobs:
         with:
           ruby-version: '2.7'
 
-      # Install Fastlane dependencies
-      - name: Install Fastlane
+      # Install Bundler compatible with Ruby 2.7
+      - name: Install Bundler
         run: |
-          gem install bundler
+          gem install bundler -v 2.4.22
           bundle install
 
       # Take screenshots for the app using Fastlane
@@ -107,4 +107,18 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }} # Fastlane match password if using match
         run: |
-          bundle exec fastlane enterprise
+          bundle exec fastlane enterprise_release
+
+      # Deploy the app to TestFlight using Fastlane
+      - name: Deploy to TestFlight
+        env:
+          KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }} # Fastlane match password if using match
+        run: |
+          bundle exec fastlane deploy
+
+      # Final step to indicate job completion
+      - name: Complete job
+        run: echo "Job complete"
+
