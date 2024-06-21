@@ -1,16 +1,14 @@
-name: "Build and Deploy iOS app"
+name: "Deploy iOS app"
 
-# Trigger the workflow on push to the main branch or on pull requests to the main branch
+# Trigger the workflow when the CI workflow is completed successfully
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Build iOS app"]
+    types:
+      - completed
 
 jobs:
-  build_with_signing:
+  deploy:
     runs-on: macos-latest # Use the latest macOS environment
 
     steps:
@@ -109,17 +107,4 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }} # Fastlane match password if using match
         run: |
-          bundle exec fastlane enterprise_release
-
-      # Deploy the app to TestFlight using Fastlane
-      - name: Deploy to TestFlight
-        env:
-          KEYCHAIN_PATH: $RUNNER_TEMP/app-signing.keychain-db
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }} # Fastlane match password if using match
-        run: |
-          bundle exec fastlane deploy
-
-      # Final step to indicate job completion
-      - name: Complete job
-        run: echo "Job complete"
+          bundle exec fastlane enterprise
