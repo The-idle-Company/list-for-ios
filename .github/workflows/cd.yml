@@ -82,7 +82,7 @@ jobs:
           gem install bundler -v 2.4.22
           bundle install
 
-       # Download the IPA file from S3
+      # Download the IPA file from S3
       - name: Download from S3
         run: |
           aws s3 cp s3://${{ secrets.AWS_S3_BUCKET }}/ipa/list-for-ios.ipa $RUNNER_TEMP/list-for-ios.ipa
@@ -94,7 +94,9 @@ jobs:
       # Upload IPA to TestFlight using Fastlane
       - name: Upload to TestFlight
         env:
-          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
         run: |
           bundle exec fastlane upload_ipa_to_testflight
 
