@@ -3,6 +3,35 @@
 default_platform(:ios)
 
 platform :ios do
+  desc "Take screenshots"
+  lane :take_screenshots do
+    capture_screenshots(
+      project: "list-for-ios/list-for-ios.xcodeproj" # Specify the correct project path
+    )
+  end
+
+  desc "Bump version and commit"
+  lane :bump_version do
+    increment_version_number
+    commit_version_bump(message: "Bump version to #{get_version_number}")
+    push_to_git_remote
+  end
+
+  desc "Enterprise release"
+  lane :enterprise_release do
+    match(type: "enterprise")
+    build_app(scheme: "list-for-ios", export_method: "enterprise")
+    upload_to_testflight
+    # Add your enterprise distribution steps here
+  end
+
+  desc "Deploy to TestFlight"
+  lane :deploy do
+    match(type: "appstore") # Ensure your certificates and profiles are installed
+    build_app(scheme: "list-for-ios") # Build your app
+    upload_to_testflight # Upload to TestFlight
+  end
+
   desc "Upload to TestFlight"
   lane :upload_to_testflight do
     pilot(
@@ -10,6 +39,3 @@ platform :ios do
     )
   end
 end
-
-
-
