@@ -88,20 +88,45 @@ platform :ios do
     sh "cd ./list-for-ios && xcrun agvtool next-version -all"
   end
 
+  desc "Ensure version number is set"
+  lane :set_initial_version do
+    set_info_plist_value(
+      path: "list-for-ios/list-for-ios/Info.plist",
+      key: "CFBundleShortVersionString",
+      value: "1.0"
+    )
+  end
+
   # Update increment_version lane to use increment_version_number with default patch increment
   desc "Increment version number (patch by default)"
   lane :increment_version do
+    ensure_version_set # Ensure version number is set before incrementing
     increment_version_number  # Defaults to patch version increment
   end
 
   desc "Increment version number to a specific version (optional)"
   lane :increment_version_to do |options|
-    version = options.version || 1.0  # Default to 1.0 if no version provided
+    version = options.version || "1.0"  # Default to 1.0 if no version provided
+    ensure_version_set # Ensure version number is set before incrementing
     increment_version_number(version: version)
+  end
+
+  desc "Ensure version number is set"
+  lane :ensure_version_set do
+    version = get_version_number_from_plist(
+      target: "list-for-ios",
+      plist_path: "list-for-ios/list-for-ios/Info.plist"
+    )
+    if version.empty?
+      set_initial_version
+    end
   end
 
   desc "Upload IPA to TestFlight"
   lane :upload_ipa_to_testflight do
+    # Ensure the initial version number is set
+    ensure_version_set
+
     # Increment version number (patch by default) before uploading
     increment_version
 
@@ -121,6 +146,8 @@ platform :ios do
     )
   end
 end
+
+
 
 
 
