@@ -46,22 +46,57 @@
 # end
 
 
+# default_platform(:ios)
+
+# platform :ios do
+#   desc "Increment build number"
+#   lane :increment_build do
+#     sh "cd ./list-for-ios && xcrun agvtool next-version -all"
+#   end
+
+#   desc "Increment version number to 1.0"
+#   lane :increment_version do
+#     sh "cd ./list-for-ios && xcrun agvtool new-marketing-version 1.1"
+#   end
+
+#   desc "Upload IPA to TestFlight"
+#   lane :upload_ipa_to_testflight do
+#     # Increment version number and build number before uploading
+#     increment_version
+#     increment_build
+
+#     api_key = app_store_connect_api_key(
+#       key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+#       issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+#       key_content: ENV['APP_STORE_CONNECT_API_KEY']
+#     )
+
+#     pilot(
+#       api_key: api_key,
+#       ipa: ENV['RUNNER_TEMP'] + "/list-for-ios.ipa",
+#       app_identifier: "com.ionicframework.listfforios" # Ensure this matches exactly
+#     )
+#   end
+# end
+
 
 default_platform(:ios)
 
 platform :ios do
   desc "Increment build number"
   lane :increment_build do
-    increment_build_number(
-      xcodeproj: "list-for-ios/list-for-ios.xcodeproj"
-    )
+    sh "cd ./list-for-ios && xcrun agvtool next-version -all"
   end
 
-  desc "Increment version number"
+  desc "Increment version number (patch by default)"
   lane :increment_version do
-    increment_version_number(
-      version_number: "1.0.1" # Set the version to 1.0.1
-    )
+    increment_version_number(type: "patch")  # Increments patch version by default
+  end
+
+  desc "Increment version number to a specific version (optional)"
+  lane :increment_version_to do |options|
+    version = options.version || 1.0  # Default to 1.0 if no version provided
+    increment_version_number(version: version)
   end
 
   desc "Upload IPA to TestFlight"
@@ -69,13 +104,13 @@ platform :ios do
     # Increment version number and build number before uploading
     increment_version
     increment_build
-    
+
     api_key = app_store_connect_api_key(
       key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
       issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
       key_content: ENV['APP_STORE_CONNECT_API_KEY']
     )
-    
+
     pilot(
       api_key: api_key,
       ipa: ENV['RUNNER_TEMP'] + "/list-for-ios.ipa",
