@@ -11,17 +11,12 @@ platform :ios do
   desc "Increment version number"
   lane :increment_version do
     increment_version_number(
-      bump_type: "patch", # Can be: major, minor, patch
-      xcodeproj: "list-for-ios/list-for-ios.xcodeproj"
+      bump_type: "patch" # This can be "patch", "minor", or "major"
     )
   end
 
   desc "Upload IPA to TestFlight"
   lane :upload_ipa_to_testflight do
-    increment_build
-    # Uncomment the next line if you also want to increment the version number
-    # increment_version
-
     api_key = app_store_connect_api_key(
       key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
       issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
@@ -31,9 +26,11 @@ platform :ios do
     pilot(
       api_key: api_key,
       ipa: ENV['RUNNER_TEMP'] + "/list-for-ios.ipa",
-      app_identifier: "com.ionicframework.listfforios" # Ensure this matches exactly
+      app_identifier: "com.ionicframework.listfforios"
     )
   end
 end
+
+
 
 
