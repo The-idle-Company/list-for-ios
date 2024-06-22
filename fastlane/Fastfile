@@ -97,7 +97,6 @@ platform :ios do
     )
   end
 
-  # Update increment_version lane to use increment_version_number with default patch increment
   desc "Increment version number (patch by default)"
   lane :increment_version do
     ensure_version_set # Ensure version number is set before incrementing
@@ -113,9 +112,9 @@ platform :ios do
 
   desc "Ensure version number is set"
   lane :ensure_version_set do
-    version = get_version_number_from_plist(
-      target: "list-for-ios",
-      plist_path: "list-for-ios/list-for-ios/Info.plist"
+    version = get_info_plist_value(
+      path: "list-for-ios/list-for-ios/Info.plist",
+      key: "CFBundleShortVersionString"
     )
     if version.empty?
       set_initial_version
