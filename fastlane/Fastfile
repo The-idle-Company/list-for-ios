@@ -105,7 +105,7 @@ platform :ios do
     sh "cd ./list-for-ios && xcrun agvtool next-version -all"
   end
 
-  desc "Ensure version number is set"
+  desc "Set initial version number if not set"
   lane :set_initial_version do
     set_info_plist_value(
       path: "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist",
@@ -116,23 +116,27 @@ platform :ios do
 
   desc "Increment version number (patch by default)"
   lane :increment_version do
-    ensure_version_set # Ensure version number is set before incrementing
-    increment_version_number  # Defaults to patch version increment
+    increment_version_number(bump_type: "patch")
   end
 
   desc "Increment version number to a specific version (optional)"
   lane :increment_version_to do |options|
-    version = options[:version] || "1.0"  # Default to 1.0 if no version provided
-    ensure_version_set # Ensure version number is set before incrementing
+    version = options[:version] || "1.0"
     increment_version_number(version: version)
   end
 
   desc "Ensure version number is set"
   lane :ensure_version_set do
-    version = get_info_plist_value(
-      path: "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist",
-      key: "CFBundleShortVersionString"
-    )
+    begin
+      version = get_info_plist_value(
+        path: "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist",
+        key: "CFBundleShortVersionString"
+      )
+    rescue => e
+      UI.message("Error getting version: #{e.message}")
+      version = ""
+    end
+    
     if version.nil? || version.empty?
       set_initial_version
     end
