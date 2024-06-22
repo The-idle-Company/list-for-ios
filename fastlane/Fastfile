@@ -97,6 +97,7 @@
 #   end
 # end
 
+
 default_platform(:ios)
 
 platform :ios do
@@ -129,13 +130,10 @@ platform :ios do
   lane :ensure_version_set do
     path = "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist"
     key = "CFBundleShortVersionString"
-    version = get_info_plist_value(path: path, key: key) rescue nil
+    version = get_info_plist_value(path: path, key: key) rescue ""
 
-    if version.nil?
-      UI.error("Failed to retrieve the version; it is nil. Setting to initial version.")
-      set_initial_version
-    elsif version.empty?
-      UI.error("Version retrieved is an empty string. Setting to initial version.")
+    if version.to_s.empty?
+      UI.error("Version is not set or empty, setting initial version.")
       set_initial_version
     else
       UI.message("Version retrieved successfully: #{version}")
