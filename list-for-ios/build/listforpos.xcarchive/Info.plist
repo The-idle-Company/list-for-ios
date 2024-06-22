@@ -2,32 +2,34 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>ApplicationProperties</key>
-	<dict>
-		<key>ApplicationPath</key>
-		<string>Applications/list-for-ios.app</string>
-		<key>Architectures</key>
-		<array>
-			<string>arm64</string>
-		</array>
-		<key>CFBundleIdentifier</key>
-		<string>com.ionicframework.listfforios</string>
-		<key>CFBundleShortVersionString</key>
-		<string>1.0</string>
-		<key>CFBundleVersion</key>
-		<string>1</string>
-		<key>SigningIdentity</key>
-		<string>Apple Distribution: Samuel Falode (J9PVVZHDF5)</string>
-		<key>Team</key>
-		<string>J9PVVZHDF5</string>
-	</dict>
-	<key>ArchiveVersion</key>
-	<integer>2</integer>
-	<key>CreationDate</key>
-	<date>2024-06-20T20:00:00Z</date>
-	<key>Name</key>
-	<string>list-for-ios</string>
-	<key>SchemeName</key>
-	<string>list-for-ios</string>
+    <key>ApplicationProperties</key>
+    <dict>
+        <key>ApplicationPath</key>
+        <string>Applications/list-for-ios.app</string>
+        <key>Architectures</key>
+        <array>
+            <string>arm64</string>
+        </array>
+        <key>CFBundleIdentifier</key>
+        <string>com.ionicframework.listfforios</string>
+        <key>CFBundleShortVersionString</key>
+        <string>1.0</string>
+        <key>CFBundleVersion</key>
+        <string>1</string>
+        <key>CFBundleIconName</key>
+        <string>AppIcon</string> <!-- Added key -->
+        <key>SigningIdentity</key>
+        <string>Apple Distribution: Samuel Falode (J9PVVZHDF5)</string>
+        <key>Team</key>
+        <string>J9PVVZHDF5</string>
+    </dict>
+    <key>ArchiveVersion</key>
+    <integer>2</integer>
+    <key>CreationDate</key>
+    <date>2024-06-20T20:00:00Z</date>
+    <key>Name</key>
+    <string>list-for-ios</string>
+    <key>SchemeName</key>
+    <string>list-for-ios</string>
 </dict>
 </plist>
