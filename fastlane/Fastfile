@@ -125,22 +125,20 @@ platform :ios do
     increment_version_number(version: version)
   end
 
-  # Ensures the version number is set in the Info.plist before upload
   desc "Ensure version number is set"
   lane :ensure_version_set do
-    begin
-      version = get_info_plist_value(
-        path: "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist",
-        key: "CFBundleShortVersionString"
-      )
-    rescue => e
-      UI.message("Error getting version: #{e.message}")
-      version = ""
-    end
-    
-    if version.nil? || version.empty?
-      # Set initial version if version is missing or empty
+    path = "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist"
+    key = "CFBundleShortVersionString"
+    version = get_info_plist_value(path: path, key: key) rescue nil
+
+    if version.nil?
+      UI.error("Failed to retrieve the version; it is nil. Setting to initial version.")
       set_initial_version
+    elsif version.empty?
+      UI.error("Version retrieved is an empty string. Setting to initial version.")
+      set_initial_version
+    else
+      UI.message("Version retrieved successfully: #{version}")
     end
   end
 
