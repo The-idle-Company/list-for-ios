@@ -50,6 +50,8 @@
 
 
 
+# fastlane/Fastfile
+
 default_platform(:ios)
 
 platform :ios do
@@ -64,7 +66,8 @@ platform :ios do
     pilot(
       api_key: api_key,
       ipa: ENV['RUNNER_TEMP'] + "/list-for-ios.ipa",
-      app_identifier: "com.ionicframework.listfforios" # Ensure this matches exactly
+      app_identifier: "com.ionicframework.listfforios.list-for-ios" # Ensure this matches exactly
     )
   end
 end
+
