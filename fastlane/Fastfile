@@ -91,7 +91,7 @@ platform :ios do
   desc "Ensure version number is set"
   lane :set_initial_version do
     set_info_plist_value(
-      path: "./list-for-ios/list-for-ios/build/listforpos.xcarchive/Info.plist",
+      path: "./list-for-ios/list-for-ios/Info.plist",
       key: "CFBundleShortVersionString",
       value: "1.0"
     )
@@ -113,10 +113,10 @@ platform :ios do
   desc "Ensure version number is set"
   lane :ensure_version_set do
     version = get_info_plist_value(
-      path: "./list-for-ios/list-for-ios/build/listforpos.xcarchive/Info.plist",
+      path: "./list-for-ios/list-for-ios/Info.plist",
       key: "CFBundleShortVersionString"
     )
-    if version.empty?
+    if version.nil? || version.empty?
       set_initial_version
     end
   end
