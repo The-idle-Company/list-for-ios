@@ -97,6 +97,79 @@
 #   end
 # end
 
+#################################################################
+
+# default_platform(:ios)
+
+# platform :ios do
+#   desc "Increment build number"
+#   lane :increment_build do
+#     sh "cd ./list-for-ios && xcrun agvtool next-version -all"
+#   end
+
+#   desc "Set initial version number to 1.0 if not set"
+#   lane :set_initial_version do
+#     set_info_plist_value(
+#       path: "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist",
+#       key: "CFBundleShortVersionString",
+#       value: "1.0"
+#     )
+#   end
+
+#   desc "Increment version number (patch by default)"
+#   lane :increment_version do
+#     increment_version_number(bump_type: "minor")
+#   end
+
+#   desc "Set version number to a specific version (optional)"
+#   lane :increment_version_to do |options|
+#     version = options[:version] || "1.1"
+#     increment_version_number(version: version)
+#   end
+
+#   desc "Ensure version number is set and correct"
+#   lane :ensure_version_set do
+#     path = "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist"
+#     key = "CFBundleShortVersionString"
+#     version = get_info_plist_value(path: path, key: key) rescue nil
+
+#     if version.nil? || version.empty? || version !~ /^\d+\.\d+(\.\d+)?$/
+#       UI.error("Version is missing or in an incorrect format. Setting initial version to 1.0.")
+#       set_initial_version
+#       increment_version_to(version: "1.1") # Ensure version moves to 1.1 if it had to be reset to 1.0
+#     elsif version == "1.0"
+#       UI.message("Current version is 1.0, incrementing to 1.1.")
+#       increment_version_to(version: "1.1")
+#     else
+#       UI.message("Current version: #{version}")
+#     end
+#   end
+
+#   desc "Upload IPA to TestFlight"
+#   lane :upload_ipa_to_testflight do
+#     # Ensure the initial version number is set and correct
+#     ensure_version_set
+
+#     # Increment build number before uploading
+#     increment_build
+
+#     api_key = app_store_connect_api_key(
+#       key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+#       issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+#       key_content: ENV['APP_STORE_CONNECT_API_KEY']
+#     )
+
+#     pilot(
+#       api_key: api_key,
+#       ipa: ENV['RUNNER_TEMP'] + "/list-for-ios.ipa",
+#       app_identifier: "com.ionicframework.listfforios" # Ensure this matches exactly
+#     )
+#   end
+# end
+
+
+#################################################################
+
 default_platform(:ios)
 
 platform :ios do
@@ -105,7 +178,7 @@ platform :ios do
     sh "cd ./list-for-ios && xcrun agvtool next-version -all"
   end
 
-  desc "Set initial version number to 1.0 if not set"
+  desc "Ensure version number is set"
   lane :set_initial_version do
     set_info_plist_value(
       path: "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist",
@@ -116,37 +189,35 @@ platform :ios do
 
   desc "Increment version number (patch by default)"
   lane :increment_version do
-    increment_version_number(bump_type: "minor")
+    ensure_version_set # Ensure version number is set before incrementing
+    increment_version_number  # Defaults to patch version increment
   end
 
-  desc "Set version number to a specific version (optional)"
+  desc "Increment version number to a specific version (optional)"
   lane :increment_version_to do |options|
-    version = options[:version] || "1.1"
+    version = options[:version] || "1.0"  # Default to 1.0 if no version provided
+    ensure_version_set # Ensure version number is set before incrementing
     increment_version_number(version: version)
   end
 
-  desc "Ensure version number is set and correct"
+  desc "Ensure version number is set"
   lane :ensure_version_set do
-    path = "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist"
-    key = "CFBundleShortVersionString"
-    version = get_info_plist_value(path: path, key: key) rescue nil
-
-    if version.nil? || version.empty? || version !~ /^\d+\.\d+(\.\d+)?$/
-      UI.error("Version is missing or in an incorrect format. Setting initial version to 1.0.")
+    version = get_info_plist_value(
+      path: "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist",
+      key: "CFBundleShortVersionString"
+    )
+    if version.empty?
       set_initial_version
-      increment_version_to(version: "1.1") # Ensure version moves to 1.1 if it had to be reset to 1.0
-    elsif version == "1.0"
-      UI.message("Current version is 1.0, incrementing to 1.1.")
-      increment_version_to(version: "1.1")
-    else
-      UI.message("Current version: #{version}")
     end
   end
 
   desc "Upload IPA to TestFlight"
   lane :upload_ipa_to_testflight do
-    # Ensure the initial version number is set and correct
+    # Ensure the initial version number is set
     ensure_version_set
+
+    # Increment version number (patch by default) before uploading
+    increment_version
 
     # Increment build number before uploading
     increment_build
@@ -164,6 +235,7 @@ platform :ios do
     )
   end
 end
+
 
 
 
