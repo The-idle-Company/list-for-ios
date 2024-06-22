@@ -97,7 +97,6 @@
 #   end
 # end
 
-
 default_platform(:ios)
 
 platform :ios do
@@ -117,16 +116,16 @@ platform :ios do
 
   desc "Increment version number (patch by default)"
   lane :increment_version do
-    increment_version_number(bump_type: "patch")
+    increment_version_number(bump_type: "minor")
   end
 
-  desc "Increment version number to a specific version (optional)"
+  desc "Set version number to a specific version (optional)"
   lane :increment_version_to do |options|
-    version = options[:version] || "1.0"
+    version = options[:version] || "1.1"
     increment_version_number(version: version)
   end
 
-  desc "Ensure version number is set"
+  desc "Ensure version number is set and correct"
   lane :ensure_version_set do
     path = "./list-for-ios/build/listforpos.xcarchive/Products/Applications/list-for-ios.app/Info.plist"
     key = "CFBundleShortVersionString"
@@ -135,6 +134,10 @@ platform :ios do
     if version.nil? || version.empty? || version !~ /^\d+\.\d+(\.\d+)?$/
       UI.error("Version is missing or in an incorrect format. Setting initial version to 1.0.")
       set_initial_version
+      increment_version_to(version: "1.1") # Ensure version moves to 1.1 if it had to be reset to 1.0
+    elsif version == "1.0"
+      UI.message("Current version is 1.0, incrementing to 1.1.")
+      increment_version_to(version: "1.1")
     else
       UI.message("Current version: #{version}")
     end
@@ -142,11 +145,8 @@ platform :ios do
 
   desc "Upload IPA to TestFlight"
   lane :upload_ipa_to_testflight do
-    # Ensure the initial version number is set
+    # Ensure the initial version number is set and correct
     ensure_version_set
-
-    # Increment version number (patch by default) before uploading
-    increment_version
 
     # Increment build number before uploading
     increment_build
@@ -164,3 +164,12 @@ platform :ios do
     )
   end
 end
+
+
+
+
+
+
+
+
+
