@@ -63,9 +63,8 @@ platform :ios do
 
     pilot(
       api_key: api_key,
-      ipa: ENV['RUNNER_TEMP'] + "/list-for-ios.ipa"
+      ipa: ENV['RUNNER_TEMP'] + "/list-for-ios.ipa",
+      app_identifier: "com.ionicframework.listfforios" # Ensure this matches exactly
     )
   end
 end
-
-
