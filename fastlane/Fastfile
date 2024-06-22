@@ -88,9 +88,10 @@ platform :ios do
     sh "cd ./list-for-ios && xcrun agvtool next-version -all"
   end
 
+  # Update increment_version lane to use increment_version_number with default patch increment
   desc "Increment version number (patch by default)"
   lane :increment_version do
-    increment_version_number(type: "patch")  # Increments patch version by default
+    increment_version_number  # Defaults to patch version increment
   end
 
   desc "Increment version number to a specific version (optional)"
@@ -101,8 +102,10 @@ platform :ios do
 
   desc "Upload IPA to TestFlight"
   lane :upload_ipa_to_testflight do
-    # Increment version number and build number before uploading
+    # Increment version number (patch by default) before uploading
     increment_version
+
+    # Increment build number before uploading
     increment_build
 
     api_key = app_store_connect_api_key(
@@ -118,6 +121,7 @@ platform :ios do
     )
   end
 end
+
 
 
 
