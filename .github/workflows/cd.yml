@@ -11,47 +11,32 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # Initial setup for the job
-      - name: Set up job
-        run: echo "Setting up job..."
-
-      # Enable debug logging
-      - name: Set debug logging
-        run: echo "##[debug]Logging enabled"
-
-      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Install Ruby and Fastlane
-      - name: Install Ruby and Fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.0'
+      - name: Install AWS CLI
+        run: brew install awscli
 
-      - name: Install Fastlane dependencies
+      - name: Download latest IPA from S3
         run: |
-          gem install bundler -v 2.4.22
-          bundle install
-
-      # Download the IPA file from S3
-      - name: Download from S3
-        run: |
-          aws s3 cp s3://${{ secrets.AWS_S3_BUCKET }}/ipa/list-for-ios.ipa $RUNNER_TEMP/list-for-ios.ipa
+          LATEST_IPA=$(aws s3 ls s3://${{ secrets.AWS_S3_BUCKET }}/ipa/ --recursive | sort | tail -n 1 | awk '{print $4}')
+          aws s3 cp s3://${{ secrets.AWS_S3_BUCKET }}/$LATEST_IPA $RUNNER_TEMP/list-for-ios.ipa
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      # Upload IPA to TestFlight using Fastlane
-      - name: Upload to TestFlight
-        env:
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+      - name: Install Ruby and Fastlane
         run: |
-          bundle exec fastlane upload_ipa_to_testflight
+          brew install ruby
+          gem install bundler
+          bundle install
 
-      # Final step to indicate job completion
+      - name: Install Fastlane dependencies
+        run: bundle exec fastlane install
+
+      - name: Upload to TestFlight
+        run: bundle exec fastlane upload_ipa_to_testflight
+
       - name: Complete job
         run: echo "Job complete"
